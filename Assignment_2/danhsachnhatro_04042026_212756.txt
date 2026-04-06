@@ -1,0 +1,5 @@
+DANH SACH KHACH THUE - THOI GIAN XUAT: 04/04/2026 21:27:56
+--------------------------------------------------
+Mã: K001 | Tên: MinthaCuti | Phòng: P101 | Số lượng: 1
+Mã: N001 | Tên: Hatsune Miku | Phòng: P202 | Số lượng: 7
+Mã: K002 | Tên: Huy gay sâu bọ | Phòng: P303 | Số lượng: 1

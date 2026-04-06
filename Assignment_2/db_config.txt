@@ -1,0 +1,5 @@
+localhost
+1433
+QuanLyNhaTro
+sa
+Mint1234
