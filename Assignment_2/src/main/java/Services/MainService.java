@@ -90,7 +90,7 @@ public class MainService {
             String maND = "";
             String mobile = "";
             String regex = "^[KN]\\d{3}$";
-            String regexSDT = "0\\d{9}";
+            String regexSDT = "0\\d{9}$";
 
             while (true) {
                 // 1. Nhập và kiểm tra định dạng Regex
@@ -106,6 +106,11 @@ public class MainService {
                 final String fMa = maND;
                 boolean isDuplicate = userService.getListDangThue().stream()
                         .anyMatch(u -> u.getMaND().equalsIgnoreCase(fMa));
+
+                if (isDuplicate) {
+                    System.out.println("Lỗi: Mã này đang được sử dụng.");
+                    continue;
+                }
 
                 // 2. Nhập số điện thoại và kiểm tra định dạng
                 System.out.println("Nhập số điện thoại người thuê: ");
@@ -126,12 +131,7 @@ public class MainService {
                     System.out.println("Lỗi: Số điện thoại này đã được đăng ký bởi người khác.");
                     continue;
                 }
-
-                if (isDuplicate) {
-                    System.out.println("Lỗi: Mã này đang được sử dụng.");
-                } else {
-                    break; // Mọi thứ đều ổn, thoát vòng lặp
-                }
+                break;
             }
 
             System.out.print("Chọn hình thức (1. Cá nhân | 2. Nhóm): ");
