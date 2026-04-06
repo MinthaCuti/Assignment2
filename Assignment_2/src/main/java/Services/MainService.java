@@ -112,17 +112,16 @@ public class MainService {
                 mobile = sc.nextLine().trim();
 
                 if (!mobile.matches(regexSDT)) {
-                } else {
                     System.out.println("Lỗi: Định dạng không hợp lệ! SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số!");
                     continue;
                 }
 
                 // Kiểm tra trùng số điện thoại
                 final String fmobile = mobile;
-            // Sửa lỗi: anyMatch cần so sánh bằng equals thay vì chỉ gọi getSdt()
-            boolean isSdtTrung = userService.getListDangThue().stream()
-                    .anyMatch(u -> u.getSdt() != null && u.getSdt().equals(fmobile));
-                 
+                // Sửa lỗi: anyMatch cần so sánh bằng equals thay vì chỉ gọi getSdt()
+                boolean isSdtTrung = userService.getListDangThue().stream()
+                        .anyMatch(u -> u.getSdt() != null && u.getSdt().equals(fmobile));
+
                 if (isSdtTrung) {
                     System.out.println("Lỗi: Số điện thoại này đã được đăng ký bởi người khác.");
                     continue;
