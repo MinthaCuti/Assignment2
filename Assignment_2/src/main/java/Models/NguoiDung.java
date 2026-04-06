@@ -61,10 +61,19 @@ public class NguoiDung {
         this.maPhong = maPhong;
     }
 
+    public String getSdt() {
+        return sdt;
+    }
+
+    public void setSdt(String sdt) {
+        this.sdt = sdt;
+    }
+
+    
     @Override
     public String toString() {
         // Nếu email là số thì hiểu là số lượng người
-        return String.format("Mã: %s | Tên: %s | Phòng: %s | Số lượng: %s", 
-                              maND, hoTen, maPhong, email);
+        return String.format("Mã: %s | Tên: %s | SĐT: %s |Phòng: %s | Số lượng: %s", 
+                              maND, hoTen, sdt, maPhong, email);
     }
 }

@@ -88,14 +88,50 @@ public class MainService {
             }
 
             String maND = "";
+            String mobile = "";
+            String regex = "^[KN]\\d{3}$";
+            String regexSDT = "0\\d{9}";
+
             while (true) {
+                // 1. Nhập và kiểm tra định dạng Regex
                 System.out.print("Mã định danh (Khách/Nhóm) (K00x/N00x): ");
                 maND = sc.nextLine().trim();
+
+                if (!maND.matches(regex)) {
+                    System.out.println("Lỗi: Định dạng không hợp lệ! Vui lòng nhập theo mẫu K00x hoặc N00x.");
+                    continue; // Bắt nhập lại ngay lập tức
+                }
+
+                // Nếu định dạng đã đúng, mới kiểm tra xem mã đã tồn tại chưa
                 final String fMa = maND;
-                if (userService.getListDangThue().stream().anyMatch(u -> u.getMaND().equalsIgnoreCase(fMa))) {
+                boolean isDuplicate = userService.getListDangThue().stream()
+                        .anyMatch(u -> u.getMaND().equalsIgnoreCase(fMa));
+
+                // 2. Nhập số điện thoại và kiểm tra định dạng
+                System.out.println("Nhập số điện thoại người thuê: ");
+                mobile = sc.nextLine().trim();
+
+                if (!mobile.matches(regexSDT)) {
+                } else {
+                    System.out.println("Lỗi: Định dạng không hợp lệ! SĐT phải bắt đầu bằng số 0 và có đúng 10 chữ số!");
+                    continue;
+                }
+
+                // Kiểm tra trùng số điện thoại
+                final String fmobile = mobile;
+            // Sửa lỗi: anyMatch cần so sánh bằng equals thay vì chỉ gọi getSdt()
+            boolean isSdtTrung = userService.getListDangThue().stream()
+                    .anyMatch(u -> u.getSdt() != null && u.getSdt().equals(fmobile));
+                 
+                if (isSdtTrung) {
+                    System.out.println("Lỗi: Số điện thoại này đã được đăng ký bởi người khác.");
+                    continue;
+                }
+
+                if (isDuplicate) {
                     System.out.println("Lỗi: Mã này đang được sử dụng.");
                 } else {
-                    break;
+                    break; // Mọi thứ đều ổn, thoát vòng lặp
                 }
             }
 
@@ -110,6 +146,7 @@ public class MainService {
                 sl = Integer.parseInt(sc.nextLine());
             }
 
+//--------------------------------------------------------------------------------
             userService.thuePhong(maND, ten, mp, sl);
             sqlRepo.insertNguoiDungSql(new NguoiDung(maND, ten, "N/A", String.valueOf(sl), mp), sl);
             System.out.println("~ THUÊ PHÒNG THÀNH CÔNG ~");
@@ -194,6 +231,17 @@ public class MainService {
                 ma = maTuDong;
                 System.out.println("Thực hiện đánh giá cho mã: " + ma);
             }
+            var userOpt = userService.getListDangThue().stream()
+                    .filter(u -> u.getMaND().equalsIgnoreCase(ma))
+                    .findFirst();
+
+            if (userOpt.isEmpty()) {
+                System.out.println("Lỗi: Không tìm thấy người thuê nào với mã " + ma);
+                return; // Thoát ra nếu không thấy người thuê
+            }
+
+            String tenNguoiThue = userOpt.get().getHoTen(); // Lấy tên từ object User
+            System.out.println(">> Đang thực hiện đánh giá cho: " + tenNguoiThue + " (" + ma + ")");
 
             System.out.print("Số sao (1-5): ");
             int sao = Integer.parseInt(sc.nextLine());
@@ -201,7 +249,7 @@ public class MainService {
             System.out.print("Nội dung: ");
             String nd = sc.nextLine().trim();
 
-            sqlRepo.insertDanhGiaSql(ma, sao, nd);
+            sqlRepo.insertDanhGiaSql(ma, tenNguoiThue, sao, nd);
             System.out.println("~ ĐÃ LƯU ĐÁNH GIÁ ~");
         } catch (Exception e) {
             System.err.println("Lỗi đánh giá: " + e.getMessage());

@@ -20,8 +20,6 @@ public class JdbcHelper {
 
     
     public static Connection getConnection() {
-        File checkFile = new File("db_config.txt");
-        System.out.println(">>> NetBeans đang tìm file tại: " + checkFile.getAbsolutePath());
         
         List<String> configs = new ArrayList<>();
 

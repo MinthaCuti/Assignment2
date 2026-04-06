@@ -18,7 +18,6 @@ public class DataRepository {
     public void clearAllDataDemo() {
         try (Connection conn = JdbcHelper.getConnection(); Statement st = conn.createStatement()) {
             st.executeUpdate("DELETE FROM NguoiDung");
-            st.executeUpdate("DELETE FROM LichSuThue");
             st.executeUpdate("UPDATE NhaTro SET TrangThai = 0, TinhTrangVatChat = 0");
             System.out.println(">>> [SQL] Database đã được làm sạch cho phiên Demo.");
         } catch (Exception e) {
@@ -96,12 +95,13 @@ public class DataRepository {
         }
     }
 
-    public void insertDanhGiaSql(String maKH, int soSao, String noiDung) {
-        String sql = "INSERT INTO DanhGia (MaND, SoSao, NoiDung) VALUES (?, ?, ?)";
+    public void insertDanhGiaSql(String maKH, String hoTen, int soSao, String noiDung) {
+        String sql = "INSERT INTO DanhGia (MaND, HoTen, SoSao, NoiDung) VALUES (?, ?, ?, ?)";
         try (Connection conn = JdbcHelper.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maKH);
-            ps.setInt(2, soSao);
-            ps.setString(3, noiDung);
+            ps.setString(2, hoTen);
+            ps.setInt(3, soSao);
+            ps.setString(4, noiDung);
             ps.executeUpdate();
         } catch (Exception e) {
             System.err.println(">>>Lỗi SQL DanhGia: " + e.getMessage());
