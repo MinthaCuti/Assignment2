@@ -30,21 +30,20 @@ public class DataRepository {
     public void insertNguoiDungSql(NguoiDung nd, int soLuong) throws Exception {
         // Chúng ta lưu số lượng vào cột Email để không cần sửa Table SQL
         String sql = "INSERT INTO NguoiDung (MaND, HoTen, SDT, Email, MaPhong) VALUES (?, ?, ?, ?, ?)";
-        
-        try (Connection conn = JdbcHelper.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = JdbcHelper.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, nd.getMaND());
             ps.setString(2, nd.getHoTen());
-            ps.setString(3, "N/A"); 
+            ps.setString(3, "N/A");
             ps.setString(4, String.valueOf(soLuong)); // Lưu số lượng người vào đây
             ps.setString(5, nd.getMaPhong());
-            
+
             ps.executeUpdate();
-            
+
             // Cập nhật luôn trạng thái phòng lên "Đã thuê" (TrangThai = 1)
             updateTrangThaiPhongSql(nd.getMaPhong(), 1);
-            
+
         } catch (SQLException e) {
             if (e.getErrorCode() == 2627) {
                 throw new Exception("Mã [" + nd.getMaND() + "] đã tồn tại trên hệ thống!");
@@ -57,7 +56,7 @@ public class DataRepository {
     public void deleteAndMoveToHistorySql(NguoiDung nd) {
         String sqlInsertLS = "INSERT INTO LichSuThue (MaND, HoTen, MaPhong, SoLanThue) VALUES (?, ?, ?, 1)";
         String sqlDelete = "DELETE FROM NguoiDung WHERE MaND = ?";
-        
+
         try (Connection conn = JdbcHelper.getConnection()) {
             // Lưu lịch sử
             PreparedStatement psLS = conn.prepareStatement(sqlInsertLS);
@@ -65,12 +64,12 @@ public class DataRepository {
             psLS.setString(2, nd.getHoTen());
             psLS.setString(3, nd.getMaPhong());
             psLS.executeUpdate();
-            
+
             // Xóa bảng hiện tại
             PreparedStatement psDel = conn.prepareStatement(sqlDelete);
             psDel.setString(1, nd.getMaND());
             psDel.executeUpdate();
-            
+
             System.out.println(">>> [SQL] Đã di dời dữ liệu nhóm/khách sang Lịch sử.");
         } catch (Exception e) {
             System.err.println(">>> Lỗi SQL di dời: " + e.getMessage());
@@ -83,27 +82,29 @@ public class DataRepository {
             ps.setInt(1, trangThai);
             ps.setString(2, maPhong);
             ps.executeUpdate();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
-    
+
     public void updateTinhTrangVatChatSql(String maPhong, int tinhTrang) {
         String sql = "UPDATE NhaTro SET TinhTrangVatChat = ? WHERE MaPhong = ?";
         try (Connection conn = JdbcHelper.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, tinhTrang);
             ps.setString(2, maPhong);
             ps.executeUpdate();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
+
     public void insertDanhGiaSql(String maKH, int soSao, String noiDung) {
-    String sql = "INSERT INTO DanhGia (MaND, SoSao, NoiDung) VALUES (?, ?, ?)";
-    try (Connection conn = JdbcHelper.getConnection(); 
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setString(1, maKH);
-        ps.setInt(2, soSao);
-        ps.setString(3, noiDung);
-        ps.executeUpdate();
-    } catch (Exception e) {
-        System.err.println(">>>Lỗi SQL DanhGia: " + e.getMessage());
+        String sql = "INSERT INTO DanhGia (MaND, SoSao, NoiDung) VALUES (?, ?, ?)";
+        try (Connection conn = JdbcHelper.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maKH);
+            ps.setInt(2, soSao);
+            ps.setString(3, noiDung);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(">>>Lỗi SQL DanhGia: " + e.getMessage());
+        }
     }
-}
 }
