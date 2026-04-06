@@ -25,7 +25,8 @@ public class NguoiDungService {
     }
 
     // HÀM QUAN TRỌNG: Xử lý thuê (dùng chung cho cả cá nhân và nhóm)
-    public void thuePhong(String ma, String ten, String maPhong, int soLuong) throws Exception {
+    // HÀM QUAN TRỌNG: Xử lý thuê (Đã cập nhật thêm tham số String sdt)
+    public void thuePhong(String ma, String ten, String sdt, String maPhong, int soLuong) throws Exception {
         // 1. Tìm phòng trong hệ thống
         NhaTro phong = phongService.findPhong(maPhong);
         if (phong == null) {
@@ -37,13 +38,18 @@ public class NguoiDungService {
             throw new Exception("Phòng " + maPhong + " đang hỏng, không thể cho thuê!");
         }
 
-        // 3. Kiểm tra sức chứa (Max 10 người) - Gọi hàm bên Model NhaTro đã sửa
+        // 3. Kiểm tra sức chứa (Max 10 người)
         phong.checkAndAddPeople(soLuong);
 
-        // 4. Tạo đối tượng lưu trữ (Mã nhóm/Mã khách)
-        // Lưu số lượng vào tên hoặc ghi chú để "nhẹ máy"
-        NguoiDung nd = new NguoiDung(ma, ten, "N/A", String.valueOf(soLuong), maPhong);
+        // 4. Tạo đối tượng lưu trữ (Đã sửa: Thay "N/A" bằng biến sdt truyền vào)
+        // Cấu trúc: NguoiDung(maND, hoTen, sdt, email, maPhong)
+        // Ở đây bạn đang tạm dùng cột Email để lưu số lượng người (soLuong)
+        NguoiDung nd = new NguoiDung(ma, ten, sdt, String.valueOf(soLuong), maPhong);
+        
+        // Thêm vào danh sách đang thuê trong RAM
         listDangThue.add(nd);
+        
+        System.out.println(">>> [Service] Đã thêm khách " + ten + " vào danh sách RAM.");
     }
 
     // Hàm xử lý khi khách/nhóm rời đi

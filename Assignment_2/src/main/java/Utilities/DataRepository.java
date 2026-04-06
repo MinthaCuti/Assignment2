@@ -34,7 +34,7 @@ public class DataRepository {
 
             ps.setString(1, nd.getMaND());
             ps.setString(2, nd.getHoTen());
-            ps.setString(3, "N/A");
+            ps.setString(3, nd.getSdt());
             ps.setString(4, String.valueOf(soLuong)); // Lưu số lượng người vào đây
             ps.setString(5, nd.getMaPhong());
 

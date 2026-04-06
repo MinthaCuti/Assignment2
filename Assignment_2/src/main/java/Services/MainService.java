@@ -146,8 +146,13 @@ public class MainService {
             }
 
 //--------------------------------------------------------------------------------
-            userService.thuePhong(maND, ten, mp, sl);
-            sqlRepo.insertNguoiDungSql(new NguoiDung(maND, ten, "N/A", String.valueOf(sl), mp), sl);
+            NguoiDung ndMoi = new NguoiDung(maND, ten, mobile, String.valueOf(sl), mp);
+
+            // 2. Gọi Service để lưu vào RAM (QUAN TRỌNG: Phải truyền thêm 'mobile' vào đây)
+            userService.thuePhong(maND, ten, mobile, mp, sl);
+
+            // 3. Gọi Repo để lưu vào SQL
+            sqlRepo.insertNguoiDungSql(ndMoi, sl);
             System.out.println("~ THUÊ PHÒNG THÀNH CÔNG ~");
             Models.NhaTro phongVuaThue = phongService.findPhong(mp);
             if (phongVuaThue != null) {
@@ -166,6 +171,8 @@ public class MainService {
         try {
             System.out.print("Nhập mã khách muốn trả phòng: ");
             String ma = sc.nextLine().trim();
+
+            // 1. Tìm đối tượng khách TRƯỚC
             NguoiDung target = userService.getListDangThue().stream()
                     .filter(u -> u.getMaND().equalsIgnoreCase(ma))
                     .findFirst().orElse(null);
@@ -173,25 +180,36 @@ public class MainService {
             if (target != null) {
                 String confirm = "";
                 do {
-                    System.out.print("Xác nhận trả phòng? (C/K): ");
+                    System.out.print("Xác nhận trả phòng cho mã [" + ma + "]? (C/K): ");
                     confirm = sc.nextLine().trim().toUpperCase();
                 } while (!confirm.equals("C") && !confirm.equals("K"));
 
                 if (confirm.equals("C")) {
+                    // --- BƯỚC QUAN TRỌNG: ĐÁNH GIÁ TRƯỚC KHI XÓA ---
+                    System.out.print("Gửi đánh giá luôn không? (C/K): ");
+                    if (sc.nextLine().trim().equalsIgnoreCase("C")) {
+                        // Lúc này khách vẫn còn trong listDangThue nên handleDanhGia sẽ tìm thấy
+                        handleDanhGia(ma);
+                    }
+
+                    // --- SAU ĐÓ MỚI THỰC HIỆN XÓA ---
                     String mp = target.getMaPhong();
+
+                    // Xóa khỏi RAM
                     userService.moveUserToHistory(ma);
+
+                    // Xóa khỏi SQL và đẩy sang Lịch sử
                     sqlRepo.deleteAndMoveToHistorySql(target);
+
+                    // Cập nhật trạng thái phòng về "Trống" (0) nếu không còn ai ở
                     if (phongService.findPhong(mp).getSoNguoiHienTai() == 0) {
                         sqlRepo.updateTrangThaiPhongSql(mp, 0);
                     }
+
                     System.out.println("~ TRẢ PHÒNG THÀNH CÔNG ~");
-                    System.out.print("Gửi đánh giá luôn không? (C/K): ");
-                    if (sc.nextLine().trim().equalsIgnoreCase("C")) {
-                        handleDanhGia(ma);
-                    }
                 }
             } else {
-                System.out.println("Không tìm thấy mã khách.");
+                System.out.println("Lỗi: Không tìm thấy người thuê nào với mã " + ma);
             }
         } catch (Exception e) {
             System.err.println("Lỗi trả phòng: " + e.getMessage());
@@ -256,11 +274,73 @@ public class MainService {
     }
 
     public void showKhachDangThue() {
-        userService.getListDangThue().forEach(System.out::println);
+        System.out.println("\n==========================================================================");
+        System.out.println("                DANH SÁCH KHÁCH HÀNG ĐANG THUÊ PHÒNG                      ");
+        System.out.println("==========================================================================");
+
+        // 1. Lấy danh sách từ Service 
+        // Lưu ý: Đảm bảo trong NguoiDungService đã xóa dòngs
+        List<NguoiDung> ds = userService.getListDangThue();
+
+        // 2. Kiểm tra nếu danh sách trống
+        if (ds == null || ds.isEmpty()) {
+            System.out.println(" >>> THÔNG BÁO: Hiện tại hệ thống chưa có khách hàng nào đang thuê.");
+            System.out.println("==========================================================================");
+            return; // Thoát hàm sớm
+        }
+
+        // 3. In tiêu đề cột (Sử dụng printf để căn lề)
+        // %-10s: Căn lề trái 10 ký tự | %-20s: Căn lề trái 20 ký tự...
+        System.out.printf("%-10s | %-20s | %-12s | %-10s | %-5s\n",
+                "Mã ND", "Họ và Tên", "Số ĐT", "Mã Phòng", "SL");
+        System.out.println("--------------------------------------------------------------------------");
+
+        // 4. Duyệt danh sách và in dữ liệu
+        for (NguoiDung nd : ds) {
+            // Lấy số lượng người tạm lưu ở cột Email
+            String soLuong = nd.getEmail();
+
+            System.out.printf("%-10s | %-20s | %-12s | %-10s | %-5s\n",
+                    nd.getMaND(),
+                    nd.getHoTen(),
+                    nd.getSdt(),
+                    nd.getMaPhong(),
+                    soLuong);
+        }
+
+        System.out.println("--------------------------------------------------------------------------");
+        System.out.println(" Tổng cộng: " + ds.size() + " nhóm/khách đang ở.");
+        System.out.println("==========================================================================\n");
     }
 
     public void showLichSu() {
-        userService.getListLichSu().forEach(System.out::println);
+        System.out.println("\n==========================================================================");
+        System.out.println("                DANH SÁCH KHÁCH HÀNG ĐANG THUÊ PHÒNG                      ");
+        System.out.println("==========================================================================");
+
+        List<NguoiDungDaTungThue> ds = userService.getListLichSu();
+
+        if (ds == null || ds.isEmpty()) {
+            System.out.println(" >>> THÔNG BÁO: Hiện tại hệ thống chưa có khách hàng nào đang thuê.");
+            System.out.println("==========================================================================");
+            return; // Thoát hàm sớm
+        }
+
+        System.out.printf("%-10s | %-20s | %-12s | %-10s | %-5s\n",
+                "Mã ND", "Họ và Tên", "Số ĐT", "Mã Phòng", "SL");
+        System.out.println("--------------------------------------------------------------------------");
+
+        for (NguoiDung nd : ds) {
+            // Lấy số lượng người tạm lưu ở cột Email
+            String soLuong = nd.getEmail();
+
+            System.out.printf("%-10s | %-20s | %-12s | %-10s | %-5s\n",
+                    nd.getMaND(),
+                    nd.getHoTen(),
+                    nd.getSdt(),
+                    nd.getMaPhong(),
+                    soLuong);
+        }
     }
 
     public void showPhongGoiY() {
