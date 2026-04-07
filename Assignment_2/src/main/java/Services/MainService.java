@@ -315,7 +315,7 @@ public class MainService {
 
     public void showLichSu() {
         System.out.println("\n==========================================================================");
-        System.out.println("                DANH SÁCH KHÁCH HÀNG ĐANG THUÊ PHÒNG                      ");
+        System.out.println("                DANH SÁCH KHÁCH HÀNG ĐÃ TRẢ PHÒNG                      ");
         System.out.println("==========================================================================");
 
         List<NguoiDungDaTungThue> ds = userService.getListLichSu();

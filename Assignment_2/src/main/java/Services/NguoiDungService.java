@@ -48,8 +48,6 @@ public class NguoiDungService {
         
         // Thêm vào danh sách đang thuê trong RAM
         listDangThue.add(nd);
-        
-        System.out.println(">>> [Service] Đã thêm khách " + ten + " vào danh sách RAM.");
     }
 
     // Hàm xử lý khi khách/nhóm rời đi

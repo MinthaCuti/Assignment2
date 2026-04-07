@@ -35,7 +35,8 @@ public class HoaDon {
         System.out.println("--- PHIẾU TẠM TÍNH ---");
         System.out.printf("Giá phòng: %,.0f VND\n", giaPhong);
         System.out.println("Số người ở: " + soNguoi);
-        System.out.printf("Tổng cộng: %,.0f VND\n", (giaPhong * soNguoi)); // Có thể thêm logic phụ phí ở đây
+        System.out.printf("Tổng cộng: %,.0f VND\n", giaPhong);// Có thể thêm logic phụ phí ở đây
+        System.out.printf("Chia bill cho từng người: %,.0f VND\n", (giaPhong/soNguoi));
         System.out.println("----------------------");
     }
 }
