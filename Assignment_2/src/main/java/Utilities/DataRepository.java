@@ -53,7 +53,7 @@ public class DataRepository {
 
     // 3. Hàm xóa và đẩy sang Lịch sử
     public void deleteAndMoveToHistorySql(NguoiDung nd) {
-        String sqlInsertLS = "INSERT INTO LichSuThue (MaND, HoTen, MaPhong, SoLanThue) VALUES (?, ?, ?, 1)";
+        String sqlInsertLS = "INSERT INTO LichSuThue (MaND, HoTen, SDT, MaPhong, SoLanThue) VALUES (?, ?, ?, ?, 1)";
         String sqlDelete = "DELETE FROM NguoiDung WHERE MaND = ?";
 
         try (Connection conn = JdbcHelper.getConnection()) {
@@ -61,7 +61,8 @@ public class DataRepository {
             PreparedStatement psLS = conn.prepareStatement(sqlInsertLS);
             psLS.setString(1, nd.getMaND());
             psLS.setString(2, nd.getHoTen());
-            psLS.setString(3, nd.getMaPhong());
+            psLS.setString(3, nd.getSdt());
+            psLS.setString(4, nd.getMaPhong());
             psLS.executeUpdate();
 
             // Xóa bảng hiện tại
@@ -95,13 +96,14 @@ public class DataRepository {
         }
     }
 
-    public void insertDanhGiaSql(String maKH, String hoTen, int soSao, String noiDung) {
-        String sql = "INSERT INTO DanhGia (MaND, HoTen, SoSao, NoiDung) VALUES (?, ?, ?, ?)";
+    public void insertDanhGiaSql(String maKH, String hoTen, String sdt, int soSao, String noiDung) {
+        String sql = "INSERT INTO DanhGia (MaND, HoTen, SDT, SoSao, NoiDung) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = JdbcHelper.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maKH);
             ps.setString(2, hoTen);
-            ps.setInt(3, soSao);
-            ps.setString(4, noiDung);
+            ps.setString(3, sdt);
+            ps.setInt(4, soSao);
+            ps.setString(5, noiDung);
             ps.executeUpdate();
         } catch (Exception e) {
             System.err.println(">>>Lỗi SQL DanhGia: " + e.getMessage());

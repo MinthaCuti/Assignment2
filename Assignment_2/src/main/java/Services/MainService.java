@@ -185,6 +185,8 @@ public class MainService {
                 } while (!confirm.equals("C") && !confirm.equals("K"));
 
                 if (confirm.equals("C")) {
+                    String hoTen = target.getHoTen();
+                    String sdt = target.getSdt();
                     // --- BƯỚC QUAN TRỌNG: ĐÁNH GIÁ TRƯỚC KHI XÓA ---
                     System.out.print("Gửi đánh giá luôn không? (C/K): ");
                     if (sc.nextLine().trim().equalsIgnoreCase("C")) {
@@ -192,7 +194,6 @@ public class MainService {
                         handleDanhGia(ma);
                     }
 
-                    // --- SAU ĐÓ MỚI THỰC HIỆN XÓA ---
                     String mp = target.getMaPhong();
 
                     // Xóa khỏi RAM
@@ -246,19 +247,20 @@ public class MainService {
                 ma = sc.nextLine().trim();
             } else {
                 ma = maTuDong;
-                System.out.println("Thực hiện đánh giá cho mã: " + ma);
             }
-            var userOpt = userService.getListDangThue().stream()
+            NguoiDung user = userService.getListDangThue().stream()
                     .filter(u -> u.getMaND().equalsIgnoreCase(ma))
-                    .findFirst();
+                    .findFirst().orElse(null);
 
-            if (userOpt.isEmpty()) {
-                System.out.println("Lỗi: Không tìm thấy người thuê nào với mã " + ma);
-                return; // Thoát ra nếu không thấy người thuê
+            if (user == null) {
+                System.out.println("Lỗi: Không tìm thấy thông tin khách [" + ma + "] để đánh giá.");
+                return;
             }
 
-            String tenNguoiThue = userOpt.get().getHoTen(); // Lấy tên từ object User
-            System.out.println(">> Đang thực hiện đánh giá cho: " + tenNguoiThue + " (" + ma + ")");
+            String tenNguoiThue = user.getHoTen();
+            String sdt = user.getSdt();
+
+            System.out.println(">>> Đánh giá cho: " + tenNguoiThue + " (" + ma + ")");
 
             System.out.print("Số sao (1-5): ");
             int sao = Integer.parseInt(sc.nextLine());
@@ -266,10 +268,14 @@ public class MainService {
             System.out.print("Nội dung: ");
             String nd = sc.nextLine().trim();
 
-            sqlRepo.insertDanhGiaSql(ma, tenNguoiThue, sao, nd);
-            System.out.println("~ ĐÃ LƯU ĐÁNH GIÁ ~");
+            // Ghi vào SQL
+            sqlRepo.insertDanhGiaSql(ma, tenNguoiThue, sdt, sao, nd);
+            System.out.println("~ ĐÃ LƯU ĐÁNH GIÁ VÀO SQL ~");
+
+        } catch (NumberFormatException e) {
+            System.err.println("Lỗi: Số sao phải là ký tự số! (Đánh giá thất bại)");
         } catch (Exception e) {
-            System.err.println("Lỗi đánh giá: " + e.getMessage());
+            System.err.println("Lỗi hệ thống khi đánh giá: " + e.getMessage());
         }
     }
 
